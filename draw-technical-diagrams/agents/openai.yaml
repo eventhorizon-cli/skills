@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Diagram Creator"
+  short_description: "Create polished flowcharts and architecture diagrams"
+  default_prompt: "Use $draw-technical-diagrams to create a clear white-background architecture diagram for this system."
