@@ -20,7 +20,7 @@ Reusable skills for AI coding agents. This repository currently contains `draw-t
 - Preserves editable source: `.mmd` for Mermaid and `.svg` for directly authored layouts.
 - Renders white-background PNG, SVG, or PDF files with a pinned Mermaid CLI version when using Mermaid.
 - Checks clipping, text overlap, ambiguous connections, arrow direction, and unsuitable aspect ratios.
-- Uses direct SVG from the start when Mermaid is unsuitable, or switches immediately when Mermaid's rendered result is poor.
+- Uses direct SVG from the start when Mermaid's layout or runtime environment is unsuitable, or switches immediately when Mermaid's rendered result is poor.
 
 ## Requirements
 
@@ -31,7 +31,7 @@ The currently verified setup uses macOS and Codex, or another agent that can loa
 - A headless Chrome or Chromium environment. On the verified macOS setup, the script prefers Google Chrome from `/Applications` and otherwise falls back to the Mermaid CLI/Puppeteer default.
 - Network access on the first render to download Mermaid CLI.
 
-Direct SVG authoring does not require the Mermaid CLI stack. PNG output from SVG requires an available SVG renderer.
+Direct SVG authoring does not require the Mermaid CLI stack. If Node.js/`npx` is unavailable and no working Mermaid renderer is already available, use direct SVG. When Node.js/`npx` is available, one lightweight Mermaid render attempt is allowed, including the normal first `npx` dependency download. If Chrome/Chromium is unavailable, the download fails, or the sandbox blocks the renderer, switch directly to SVG without completing the environment setup or repeatedly requesting elevated permissions. PNG output from SVG requires an available SVG renderer.
 
 ## Installation
 
@@ -113,7 +113,7 @@ Source material
   -> verify the final render
 ```
 
-If Mermaid is unsuitable, the agent starts directly with SVG without a trial render. If a Mermaid render is poor, the agent switches immediately to an explicit SVG layout and keeps any existing `.mmd` as the logical model. Direct SVG diagrams do not require a `.mmd` companion. SVG can be delivered directly or rendered to a white-background PNG as needed.
+The agent checks both layout and runtime suitability using the rules above. It may try Mermaid once when Node.js is available; an environment blocker or poor render leads directly to an explicit SVG layout. Any existing `.mmd` is kept as the logical model, but diagrams started in SVG do not need a `.mmd` companion. SVG can be delivered directly or rendered to a white-background PNG as needed.
 
 The Mermaid rendering entry point is:
 

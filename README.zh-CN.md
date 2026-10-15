@@ -20,7 +20,7 @@
 - 保留可编辑源文件：使用 Mermaid 时保留 `.mmd`，直接绘制 SVG 时保留 `.svg`。
 - 使用 Mermaid 时，通过固定版本的 Mermaid CLI 输出白底 PNG、SVG 或 PDF。
 - 检查裁切、文字遮挡、连线歧义、箭头方向和异常长宽比。
-- 判断 Mermaid 不适合时直接绘制 SVG；Mermaid 成图效果不好时也立即切换 SVG。
+- 判断 Mermaid 的布局或运行环境不适合时直接绘制 SVG；Mermaid 成图效果不好时也立即切换 SVG。
 
 ## 环境要求
 
@@ -31,7 +31,7 @@
 - 可用的无头 Chrome 或 Chromium 环境。在已经验证的 macOS 环境中，脚本会优先使用 `/Applications` 中的 Google Chrome，否则交给 Mermaid CLI/Puppeteer 按默认方式处理。
 - 第一次渲染时能够联网下载 Mermaid CLI。
 
-直接编写 SVG 不依赖 Mermaid CLI 及其运行环境。如果需要从 SVG 输出 PNG，则需要可用的 SVG 渲染器。
+直接编写 SVG 不依赖 Mermaid CLI 及其运行环境。如果缺少 Node.js/`npx`，且没有现成可用的 Mermaid 渲染器，应直接使用 SVG。已有 Node.js/`npx` 时，可以轻量尝试一次 Mermaid，包括正常的首次 `npx` 依赖下载；如果缺少 Chrome/Chromium、依赖下载失败，或沙箱阻止渲染器启动，就直接切换 SVG，不必补齐整套环境，也不必反复申请提权。如果需要从 SVG 输出 PNG，则需要可用的 SVG 渲染器。
 
 ## 安装
 
@@ -110,7 +110,7 @@ Skill 会引导 Agent 按照下面的流程处理：
   -> 验证最终成图
 ```
 
-如果判断 Mermaid 不适合，Agent 会直接绘制 SVG，无需先试画 Mermaid。如果 Mermaid 成图效果不好，也会立即改用显式 SVG 布局，并保留已有的 `.mmd` 作为逻辑关系记录。从一开始就使用 SVG 的图不必额外创建 `.mmd`。最终可以直接交付 SVG，或按需输出白底 PNG。
+Agent 会按上述规则判断布局和运行环境是否适合 Mermaid：有 Node.js 时允许轻量尝试一次，环境受阻或成图效果不好时直接改用显式 SVG 布局。已有的 `.mmd` 会保留为逻辑关系记录，从一开始就使用 SVG 的图不必额外创建 `.mmd`。最终可以直接交付 SVG，或按需输出白底 PNG。
 
 Mermaid 渲染脚本的调用方式如下：
 
