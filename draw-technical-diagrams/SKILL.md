@@ -15,7 +15,7 @@ Create readable technical diagrams with Mermaid or directly authored SVG, choosi
    - Use a sequence diagram only when request order or timing is the main point.
    - Split unrelated concerns into separate diagrams instead of crowding one image.
 3. Read [layout-patterns.md](references/layout-patterns.md) when selecting layout, styling architecture roles, or fixing an awkward render.
-4. Write a `.mmd` source for Mermaid, or an explicit `.svg` for direct SVG, next to the output image unless the user requests a temporary artifact.
+4. Keep editable sources next to the output image unless the user requests a temporary artifact: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep or create a `.mmd` logical model whenever Mermaid can faithfully express the relationships (see **Direct SVG**).
 5. Render Mermaid with `scripts/render-mermaid.sh`; render directly authored SVG as described under **Direct SVG**.
 6. Inspect dimensions and open the output image. If Mermaid's layout or visual quality is poor, switch directly to SVG. Inspect and revise the final render until labels, arrows, and groups are readable without clipping or overlap.
 7. Embed the image with a relative path when editing a local Markdown document.
@@ -112,7 +112,8 @@ Author the layout directly in SVG when selected upfront, when the environment ca
 
 - Use a stable `viewBox`, an explicit white background, and explicit node and label positions. Size nodes around their text and safe content areas.
 - Give every path an explicit start point, end point, and non-overlapping route. Place arrowheads on the intended node boundary and keep lines clear of unrelated labels and group headings.
-- Keep the `.svg` as the editable visual source. Preserve an existing `.mmd` as the logical model when switching from Mermaid; do not create one solely to accompany a diagram authored directly in SVG unless requested.
+- Keep the `.svg` as the editable visual source. When Mermaid can faithfully express the diagram's logic, also keep or create a companion `.mmd` with the same basename, including for diagrams started directly in SVG. The `.mmd` records nodes, relationships, branch conditions, and meaningful sequence order for agents; it does not need to reproduce SVG coordinates, shapes, or routing. Authoring it does not require a working Mermaid runtime or a Mermaid render.
+- Keep the `.mmd` and SVG consistent when changing logic: check node names, edge directions, branch conditions, and sequence order against both sources. Omit the companion when Mermaid cannot faithfully express those semantics, or when the user excludes it; do not invent relationships to force a representation. Preserve existing valid Mermaid sources when switching to SVG.
 - Deliver SVG when the destination supports it or the user requests it. When PNG is needed, rasterize the SVG with an available trusted renderer on a white background at sufficient resolution for the destination.
 - Direct SVG authoring does not need Node.js, Mermaid CLI, or headless Chrome, but visual inspection and PNG export still need a working SVG viewer or renderer. If none is available, keep the SVG source and clearly report the unverified preview or unavailable export; do not claim verification or substitute SVG for an explicitly required PNG without explaining the limitation.
 - Visually inspect the final SVG or its rasterized preview, and any delivered PNG, using the same verification checks above. Valid SVG syntax alone is not sufficient.

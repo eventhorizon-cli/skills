@@ -17,7 +17,7 @@ Reusable skills for AI coding agents. This repository currently contains `draw-t
 `draw-technical-diagrams` gives an agent a repeatable workflow for technical diagrams:
 
 - Creates flowcharts, architecture diagrams, component diagrams, and data-flow diagrams.
-- Preserves editable source: `.mmd` for Mermaid and `.svg` for directly authored layouts.
+- Preserves Mermaid `.mmd` sources and directly authored `.svg` layouts. For SVG diagrams, also creates or updates `.mmd` as a logical record when Mermaid can faithfully express the nodes, relationships, branches, or sequence; this does not require a Mermaid runtime or rendering the `.mmd`.
 - Renders white-background PNG, SVG, or PDF files with a pinned Mermaid CLI version when using Mermaid.
 - Checks clipping, text overlap, ambiguous connections, arrow direction, and unsuitable aspect ratios.
 - Uses direct SVG from the start when Mermaid's layout or runtime environment is unsuitable, or switches immediately when Mermaid's rendered result is poor.
@@ -64,8 +64,8 @@ Draw an order submission flow:
 Submit order -> validate order -> save to database -> return success.
 Return an error when validation fails.
 
-Keep the editable source (.mmd for Mermaid or .svg for direct SVG) and export
-a high-resolution PNG with a white background.
+Keep editable sources and export a high-resolution PNG with a white background.
+If using SVG, also keep `.mmd` when Mermaid can faithfully express the flow logic.
 ```
 
 For a more complex system, provide components, boundaries, connections, and the intended reading direction:
@@ -75,9 +75,10 @@ Read the current project and draw its system architecture.
 
 Separate the API, application service, message broker, consumer, and database
 into their real ownership boundaries. Use solid lines for data flow and dashed
-lines for registration or discovery. Keep the editable source (.mmd for
-Mermaid or .svg for direct SVG) and export a high-resolution white-background
-PNG suitable for a technical article.
+lines for registration or discovery. Keep editable sources and export a
+high-resolution white-background PNG suitable for a technical article. If using
+SVG, also keep `.mmd` when Mermaid can faithfully express the components and
+relationships.
 ```
 
 A complex diagram may not match your expectations on the first attempt. Continue the conversation and point out concrete problems, such as an arrow connected to the wrong node, an image that is too wide, or details that should be moved into a separate diagram. Because the source is preserved, the agent can revise and render the existing diagram instead of starting over.
@@ -106,6 +107,7 @@ The skill guides the agent through this workflow:
 Source material
   -> identify components and relationships
   -> assess whether Mermaid suits the layout
+  -> create or update a faithful Mermaid logic record when possible
   -> create Mermaid source or directly author SVG
   -> render the requested image format
   -> inspect the rendered image
@@ -113,7 +115,7 @@ Source material
   -> verify the final render
 ```
 
-The agent checks both layout and runtime suitability using the rules above. It may try Mermaid once when Node.js is available; an environment blocker or poor render leads directly to an explicit SVG layout. Any existing `.mmd` is kept as the logical model, but diagrams started in SVG do not need a `.mmd` companion. SVG can be delivered directly or rendered to a white-background PNG as needed.
+The agent checks both layout and runtime suitability using the rules above. It may try Mermaid once when Node.js is available; an environment blocker or poor render leads directly to an explicit SVG layout. When Mermaid can faithfully express the nodes, relationships, branches, or sequence, the agent creates or updates `.mmd` as a logical record even without a Mermaid runtime, and does not need to render it. If Mermaid cannot faithfully express the logic, it does not force a `.mmd`. SVG can be delivered directly or rendered to a white-background PNG as needed.
 
 The Mermaid rendering entry point is:
 
