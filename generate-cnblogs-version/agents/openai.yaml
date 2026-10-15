@@ -1,0 +1,4 @@
+interface:
+  display_name: "生成博客园版本"
+  short_description: "Generate CNBlogs-ready Markdown using dotnet-cnblog"
+  default_prompt: "使用 $generate-cnblogs-version 为这篇 Markdown 生成博客园版本，处理本地图片并保留原稿。"

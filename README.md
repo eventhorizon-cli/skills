@@ -2,127 +2,118 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Reusable skills for AI coding agents. This repository currently contains `draw-technical-diagrams`, a skill for creating and revising technical flowcharts, system architecture diagrams, component diagrams, and data-flow diagrams.
+Reusable skills for AI coding agents: create technical diagrams and prepare Markdown articles for CNBlogs.
 
-> **Compatibility:** This skill has only been tested with Codex on macOS, so macOS is currently the only supported platform. Windows and Linux have not been verified and may not work because of dependency, path, or script differences. Other agents may be able to use the skill, but their installation paths and invocation methods can differ.
+[Skill catalog](#skill-catalog) · [Installation](#installation) · [Compatibility](#compatibility)
 
-## Available Skills
+## Skill catalog
 
-| Skill | Description |
-| --- | --- |
-| [`draw-technical-diagrams`](draw-technical-diagrams) | Creates readable technical diagrams from prose, code, or an existing sketch, then renders and verifies the final image. |
+| Skill | Use it to | Output |
+| --- | --- | --- |
+| [Technical diagrams](#technical-diagrams) | Draw or revise flowcharts, architecture diagrams, and data flows | Rendered images and editable diagram sources |
+| [生成博客园版本 · CNBlogs version](#cnblogs-version) | Convert a Markdown article using the installed `dotnet-cnblog` tool | A separate `*-cnblog.md` with hosted image links |
 
-## What It Does
-
-`draw-technical-diagrams` gives an agent a repeatable workflow for technical diagrams:
-
-- Creates flowcharts, architecture diagrams, component diagrams, and data-flow diagrams.
-- Preserves editable source: `.mmd` for Mermaid and `.svg` for directly authored layouts.
-- Renders white-background PNG, SVG, or PDF files with a pinned Mermaid CLI version when using Mermaid.
-- Checks clipping, text overlap, ambiguous connections, arrow direction, and unsuitable aspect ratios.
-- Uses direct SVG from the start when Mermaid is unsuitable, or switches immediately when Mermaid's rendered result is poor.
-
-## Requirements
-
-The currently verified setup uses macOS and Codex, or another agent that can load skills in this format. The Mermaid rendering script additionally requires:
-
-- Bash.
-- Node.js and `npx`.
-- A headless Chrome or Chromium environment. On the verified macOS setup, the script prefers Google Chrome from `/Applications` and otherwise falls back to the Mermaid CLI/Puppeteer default.
-- Network access on the first render to download Mermaid CLI.
-
-Direct SVG authoring does not require the Mermaid CLI stack. PNG output from SVG requires an available SVG renderer.
+Install either skill or both. Once recognized by your agent, use a natural-language request or invoke its `$skill-name` explicitly.
 
 ## Installation
 
-If your agent can install a skill from GitHub, give it the skill URL:
+**Ask your agent to install the skill you need** using its GitHub URL:
 
 ```text
-Install and use this skill:
+Install this skill:
 https://github.com/eventhorizon-cli/skills/tree/main/draw-technical-diagrams
 ```
 
-For a manual Codex installation, clone the repository and copy the skill into the Codex skills directory:
+```text
+Install this skill:
+https://github.com/eventhorizon-cli/skills/tree/main/generate-cnblogs-version
+```
+
+**For a manual Codex installation**, clone the repository and copy the directories you need:
 
 ```bash
 git clone --depth 1 https://github.com/eventhorizon-cli/skills.git
 mkdir -p ~/.codex/skills
+
+# Technical diagrams
 cp -R skills/draw-technical-diagrams ~/.codex/skills/
+
+# CNBlogs version
+cp -R skills/generate-cnblogs-version ~/.codex/skills/
 ```
 
-Restart Codex or open a new task if the current task does not recognize the newly installed skill. For another agent, copy the directory to that agent's supported skills location.
+If a newly installed skill is not recognized, open a new task or restart your agent. Other agents may use different installation directories.
 
-## Usage
+## Technical diagrams
 
-Once installed and recognized, the skill can be selected automatically when you ask the agent to draw or revise a technical diagram. In Codex, you can also invoke it explicitly with `$draw-technical-diagrams`.
+[`draw-technical-diagrams`](draw-technical-diagrams/SKILL.md)
 
-A simple request can start with a short process:
+Create flowcharts, system architecture diagrams, component diagrams, and data-flow diagrams from prose, code, or an existing sketch.
+
+- Choose Mermaid for suitable layouts; use directly authored SVG when precise placement is needed or Mermaid renders poorly.
+- With Node.js available, allow one lightweight Mermaid attempt. If the runtime, dependency download, or sandbox blocks it, switch to SVG.
+- Keep editable sources. For SVG diagrams, also keep a `.mmd` logical model when Mermaid can faithfully express the relationships, even if Mermaid cannot run.
+- Inspect the rendered image for clipping, crowded text, ambiguous arrows, and unsuitable proportions before delivery.
+
+**Try it**
 
 ```text
-Draw an order submission flow:
+Use $draw-technical-diagrams to draw this order flow:
 
-Submit order -> validate order -> save to database -> return success.
+Submit order -> validate -> save to database -> return success.
 Return an error when validation fails.
 
-Keep the editable source (.mmd for Mermaid or .svg for direct SVG) and export
-a high-resolution PNG with a white background.
+Export a white-background PNG and keep editable sources, including a .mmd
+logical model when the relationships can be represented in Mermaid.
 ```
 
-For a more complex system, provide components, boundaries, connections, and the intended reading direction:
+**Dependencies**
+
+| Rendering path | Requirements |
+| --- | --- |
+| Mermaid | Bash, Node.js/`npx`, and headless Chrome/Chromium; the first run may download the pinned Mermaid CLI |
+| Direct SVG | No Mermaid runtime required; a working SVG viewer or renderer is needed for visual verification and PNG export |
+
+See the [skill instructions](draw-technical-diagrams/SKILL.md) for layout and verification rules. The Mermaid helper is available at [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh).
+
+## CNBlogs version
+
+[`generate-cnblogs-version`](generate-cnblogs-version/SKILL.md) · Display name: **生成博客园版本**
+
+Generate a Markdown copy ready for the CNBlogs Markdown editor, using the installed .NET program [dotnet-cnblog](https://github.com/stulzq/dotnet-cnblogs-tool).
+
+- Run the existing tool directly, then investigate only if it fails or produces an incomplete result.
+- Upload the article's local images to the configured CNBlogs account and replace their references with hosted URLs.
+- Preserve the original and return `article-cnblog.md`. This prepares a file; it does not publish or update a blog post.
+
+**Try it**
 
 ```text
-Read the current project and draw its system architecture.
-
-Separate the API, application service, message broker, consumer, and database
-into their real ownership boundaries. Use solid lines for data flow and dashed
-lines for registration or discovery. Keep the editable source (.mmd for
-Mermaid or .svg for direct SVG) and export a high-resolution white-background
-PNG suitable for a technical article.
+Use $generate-cnblogs-version to generate a CNBlogs version of docs/article.md.
 ```
 
-A complex diagram may not match your expectations on the first attempt. Continue the conversation and point out concrete problems, such as an arrow connected to the wrong node, an image that is too wide, or details that should be moved into a separate diagram. Because the source is preserved, the agent can revise and render the existing diagram instead of starting over.
+You can also say “生成博客园版本” or “转成博客园格式” when the article is clear from the conversation.
 
-## Repository Layout
+**Tool and setup**
 
-```text
-draw-technical-diagrams/
-├── SKILL.md
-├── agents/
-│   └── openai.yaml
-├── assets/
-│   ├── mermaid.config.json
-│   └── puppeteer.macos.json
-├── references/
-│   └── layout-patterns.md
-└── scripts/
-    └── render-mermaid.sh
-```
-
-## How It Works
-
-The skill guides the agent through this workflow:
-
-```text
-Source material
-  -> identify components and relationships
-  -> assess whether Mermaid suits the layout
-  -> create Mermaid source or directly author SVG
-  -> render the requested image format
-  -> inspect the rendered image
-  -> switch directly to SVG if Mermaid's result is poor
-  -> verify the final render
-```
-
-If Mermaid is unsuitable, the agent starts directly with SVG without a trial render. If a Mermaid render is poor, the agent switches immediately to an explicit SVG layout and keeps any existing `.mmd` as the logical model. Direct SVG diagrams do not require a `.mmd` companion. SVG can be delivered directly or rendered to a white-background PNG as needed.
-
-The Mermaid rendering entry point is:
+The skill reuses your existing installation and account configuration. Its main command is:
 
 ```bash
-<skill-dir>/scripts/render-mermaid.sh input.mmd output.png
+dotnet-cnblog proc -f "/absolute/path/article.md"
 ```
 
-See [`draw-technical-diagrams/SKILL.md`](draw-technical-diagrams/SKILL.md) for the complete agent workflow and verification rules.
+If the tool is missing, the agent points to the [upstream project](https://github.com/stulzq/dotnet-cnblogs-tool) and suggests:
+
+```bash
+dotnet tool install --global dotnet-cnblog
+```
+
+If account setup is needed, complete the tool's prompts locally with a MetaWeblog token from [CNBlogs settings](https://i.cnblogs.com/settings). See the [skill instructions](generate-cnblogs-version/SKILL.md) for handling conversion failures.
+
+## Compatibility
+
+The current usage and verification environment is **Codex on macOS**. Windows, Linux, and other agents have not been verified. Dependencies are listed under each skill; installing one skill does not require the other skill's tools.
 
 ## License
 
-This repository is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE).

@@ -91,7 +91,7 @@ When a rendered edge appears to start from the wrong node, stop at a group borde
 6. Move flowchart edges around section titles and labels. Do not solve an overlap by hiding a line behind a white label background. In a sequence diagram, retain meaningful intermediate lifelines and use an opaque white backing or white halo for a message label that crosses them.
 7. Inspect the rendered image at full size and at normal article width. Mermaid source that looks logical is not sufficient if the rendered pixels imply a different relationship.
 
-Mermaid may attach cross-subgraph edges to container boundaries even when the source is valid. If this happens, switch directly to an explicit SVG with precise endpoints and routes. No revision quota is required. Keep any existing Mermaid source as the logical model and the SVG as the stable layout source; a diagram started directly in SVG does not need a Mermaid companion unless requested.
+Mermaid may attach cross-subgraph edges to container boundaries even when the source is valid. If this happens, switch directly to an explicit SVG with precise endpoints and routes. No revision quota is required. Keep the SVG as the stable layout source and keep or create a companion `.mmd` whenever Mermaid can faithfully express the logic, including for diagrams started directly in SVG. Keep both sources consistent as relationships change; the companion does not require a Mermaid runtime or render.
 
 ## Sizing Nodes Around Content
 
