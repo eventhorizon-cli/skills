@@ -1,6 +1,6 @@
 # Layout Patterns
 
-Use these patterns as starting points. Replace placeholder roles and labels with facts from the user's material.
+Use these patterns as starting points. Replace placeholder roles and labels with facts from the user's material. The Mermaid snippets illustrate logical relationships; use directly authored SVG when precise layout is needed or Mermaid's render is poor, as described in [SKILL.md](../SKILL.md#choose-mermaid-or-svg).
 
 ## System Architecture
 
@@ -62,6 +62,8 @@ flowchart TB
 
 ## Repairing Bad Aspect Ratios
 
+If Mermaid's rendered aspect ratio is unsuitable, switch directly to SVG and apply the composition principles below. These are not required Mermaid retry rounds.
+
 For an image that is too tall:
 
 1. Switch `TB` to `LR`.
@@ -86,10 +88,10 @@ When a rendered edge appears to start from the wrong node, stop at a group borde
 3. Make a successful path reach an explicit terminal state before drawing the retry path.
 4. Use a note or waiting state for an event that did not occur, such as a missing ACK; do not depict absence as a write.
 5. Route each cross-section edge to a specific side of its destination node so the arrowhead remains visible.
-6. Move edges around section titles and labels. Do not solve an overlap by hiding a line behind a white label background.
+6. Move flowchart edges around section titles and labels. Do not solve an overlap by hiding a line behind a white label background. In a sequence diagram, retain meaningful intermediate lifelines and use an opaque white backing or white halo for a message label that crosses them.
 7. Inspect the rendered image at full size and at normal article width. Mermaid source that looks logical is not sufficient if the rendered pixels imply a different relationship.
 
-Mermaid may attach cross-subgraph edges to container boundaries even when the source is valid. After two focused layout revisions, switch to an explicit SVG rather than continuing to add invisible nodes or fragile ordering constraints. Keep the Mermaid source as the logical model and the SVG as the stable layout source.
+Mermaid may attach cross-subgraph edges to container boundaries even when the source is valid. If this happens, switch directly to an explicit SVG with precise endpoints and routes. No revision quota is required. Keep any existing Mermaid source as the logical model and the SVG as the stable layout source; a diagram started directly in SVG does not need a Mermaid companion unless requested.
 
 ## Sizing Nodes Around Content
 

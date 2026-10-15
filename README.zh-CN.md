@@ -17,21 +17,21 @@
 `draw-technical-diagrams` 为 Agent 提供了一套可重复执行的技术绘图流程：
 
 - 绘制流程图、系统架构图、组件图和数据流图。
-- 保留 Mermaid `.mmd` 源文件，方便后续阅读和修改。
-- 使用固定版本的 Mermaid CLI 输出白底 PNG、SVG 或 PDF。
+- 保留可编辑源文件：使用 Mermaid 时保留 `.mmd`，直接绘制 SVG 时保留 `.svg`。
+- 使用 Mermaid 时，通过固定版本的 Mermaid CLI 输出白底 PNG、SVG 或 PDF。
 - 检查裁切、文字遮挡、连线歧义、箭头方向和异常长宽比。
-- Mermaid 经过针对性调整后仍然无法稳定排线时，改用显式 SVG 固定布局。
+- 判断 Mermaid 不适合时直接绘制 SVG；Mermaid 成图效果不好时也立即切换 SVG。
 
 ## 环境要求
 
-当前经过验证的运行环境需要：
+当前经过验证的运行环境为 macOS 和 Codex（或其他能够加载这种 Skill 格式的 Agent）。Mermaid 渲染脚本还需要：
 
-- macOS。
-- Codex，或其他能够加载这种 Skill 格式的 Agent。
 - Bash。
 - Node.js 和 `npx`。
 - 可用的无头 Chrome 或 Chromium 环境。在已经验证的 macOS 环境中，脚本会优先使用 `/Applications` 中的 Google Chrome，否则交给 Mermaid CLI/Puppeteer 按默认方式处理。
 - 第一次渲染时能够联网下载 Mermaid CLI。
+
+直接编写 SVG 不依赖 Mermaid CLI 及其运行环境。如果需要从 SVG 输出 PNG，则需要可用的 SVG 渲染器。
 
 ## 安装
 
@@ -64,7 +64,7 @@ Skill 安装并被识别后，直接要求 Agent 绘制或修改技术图，通�
 用户提交订单 -> 校验订单 -> 写入数据库 -> 返回成功。
 校验失败时直接返回错误。
 
-请保留 .mmd，并输出白底高分辨率 PNG。
+请保留可编辑源文件（Mermaid 为 .mmd，直接绘制 SVG 为 .svg），并输出白底高分辨率 PNG。
 ```
 
 面对更复杂的系统，可以补充组件、系统边界、连接关系和阅读方向：
@@ -74,7 +74,7 @@ Skill 安装并被识别后，直接要求 Agent 绘制或修改技术图，通�
 
 按照真实归属划分 API、应用服务、消息中间件、Consumer 和数据库。
 数据流使用实线，注册或发现关系使用虚线。
-请保留 .mmd，并输出适合技术文章的白底高分辨率 PNG。
+请保留可编辑源文件（Mermaid 为 .mmd，直接绘制 SVG 为 .svg），并输出适合技术文章的白底高分辨率 PNG。
 ```
 
 复杂图不一定一次就能达到预期。如果结果不合适，可以继续与 Agent 沟通，并指出具体问题，例如箭头连接到了错误的节点、图片太宽，或者某些细节应该拆成另一张图。由于图源会被保留，Agent 可以继续修改并重新渲染，不需要从头开始。
@@ -102,15 +102,17 @@ Skill 会引导 Agent 按照下面的流程处理：
 ```text
 原始材料
   -> 识别组件和关系
-  -> 生成 Mermaid 图源
-  -> 渲染 PNG/SVG/PDF
+  -> 判断 Mermaid 是否适合当前布局
+  -> 生成 Mermaid 图源或直接编写 SVG
+  -> 渲染所需图片格式
   -> 检查最终图片
-  -> 必要时修改并重新渲染
+  -> Mermaid 成图效果不好时直接切换 SVG
+  -> 验证最终成图
 ```
 
-如果 Mermaid 经过针对性调整后仍然无法得到清晰、稳定的布局，Agent 会保留 `.mmd` 作为逻辑关系记录，创建显式 SVG 作为布局源，再输出最终的白底 PNG。
+如果判断 Mermaid 不适合，Agent 会直接绘制 SVG，无需先试画 Mermaid。如果 Mermaid 成图效果不好，也会立即改用显式 SVG 布局，并保留已有的 `.mmd` 作为逻辑关系记录。从一开始就使用 SVG 的图不必额外创建 `.mmd`。最终可以直接交付 SVG，或按需输出白底 PNG。
 
-渲染脚本的调用方式如下：
+Mermaid 渲染脚本的调用方式如下：
 
 ```bash
 <skill-dir>/scripts/render-mermaid.sh input.mmd output.png
