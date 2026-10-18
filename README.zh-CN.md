@@ -18,7 +18,9 @@
 
 - 绘制流程图、系统架构图、组件图和数据流图。
 - 保留可编辑源文件：使用 Mermaid 时保留 `.mmd`，直接绘制 SVG 时保留 `.svg`。
+- 区分忠实重绘和语义优先的新图，避免在重绘已有图时悄悄改变拓扑关系。
 - 使用 Mermaid 时，通过固定版本的 Mermaid CLI 输出白底 PNG、SVG 或 PDF。
+- 在视觉检查前运行不依赖第三方包的 SVG 结构校验和 Markdown 图片链接校验。
 - 检查裁切、文字遮挡、连线歧义、箭头方向和异常长宽比。
 - 判断 Mermaid 不适合时直接绘制 SVG；Mermaid 成图效果不好时也立即切换 SVG。
 
@@ -92,6 +94,8 @@ draw-technical-diagrams/
 ├── references/
 │   └── layout-patterns.md
 └── scripts/
+    ├── check-markdown-diagrams.py
+    ├── validate-svg.py
     └── render-mermaid.sh
 ```
 
@@ -110,13 +114,36 @@ Skill 会引导 Agent 按照下面的流程处理：
   -> 验证最终成图
 ```
 
-如果判断 Mermaid 不适合，Agent 会直接绘制 SVG，无需先试画 Mermaid。如果 Mermaid 成图效果不好，也会立即改用显式 SVG 布局，并保留已有的 `.mmd` 作为逻辑关系记录。从一开始就使用 SVG 的图不必额外创建 `.mmd`。最终可以直接交付 SVG，或按需输出白底 PNG。
+如果判断 Mermaid 不适合，Agent 会直接绘制 SVG，无需先试画 Mermaid。如果 Mermaid 成图效果不好，也会立即改用显式 SVG 布局，并保留已有的 `.mmd` 作为逻辑关系记录。只要直接绘制的 SVG 关系可以用 Mermaid 准确表达，Agent 也会保留配套的 `.mmd`，方便复核拓扑关系。最终可以直接交付 SVG，或按需输出白底 PNG。
 
 Mermaid 渲染脚本的调用方式如下：
 
 ```bash
 <skill-dir>/scripts/render-mermaid.sh input.mmd output.png
 ```
+
+发布图之前，可以先检查正在编辑的 Markdown 中的本地图片引用。这个脚本
+会按照每个 Markdown 文件所在目录解析相对路径，支持 `![alt](image.svg)`
+和 HTML 的 `<img src="image.svg">` 两种写法，并跳过远程 URL、data URL
+以及只包含锚点的链接：
+
+```bash
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md docs/design
+```
+
+脚本会输出每个本地引用及其所在行。所有本地图片都存在时退出码为 `0`；
+发现一个或多个缺失图片时退出码为 `1`；输入文件不存在或无法读取时退出码
+为 `2`。
+
+对于直接编写的 SVG，可以在视觉检查前运行不依赖第三方包的结构检查：
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+```
+
+这个校验器会检查 XML、画布元数据、显式白色背景覆盖、文本定位、marker
+引用、重复 ID 和重复路径几何。警告会单独输出，加入 `--strict` 后警告也会
+使校验失败。
 
 完整的 Agent 工作流和图片检查规则可以查看 [`draw-technical-diagrams/SKILL.md`](draw-technical-diagrams/SKILL.md)。
 
