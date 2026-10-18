@@ -18,7 +18,9 @@ Reusable skills for AI coding agents. This repository currently contains `draw-t
 
 - Creates flowcharts, architecture diagrams, component diagrams, and data-flow diagrams.
 - Preserves editable source: `.mmd` for Mermaid and `.svg` for directly authored layouts.
+- Separates faithful redraws from semantic-first creation so an existing diagram is not silently redesigned.
 - Renders white-background PNG, SVG, or PDF files with a pinned Mermaid CLI version when using Mermaid.
+- Runs dependency-free SVG and Markdown link checks before visual review.
 - Checks clipping, text overlap, ambiguous connections, arrow direction, and unsuitable aspect ratios.
 - Uses direct SVG from the start when Mermaid is unsuitable, or switches immediately when Mermaid's rendered result is poor.
 
@@ -95,6 +97,8 @@ draw-technical-diagrams/
 ├── references/
 │   └── layout-patterns.md
 └── scripts/
+    ├── check-markdown-diagrams.py
+    ├── validate-svg.py
     └── render-mermaid.sh
 ```
 
@@ -113,13 +117,36 @@ Source material
   -> verify the final render
 ```
 
-If Mermaid is unsuitable, the agent starts directly with SVG without a trial render. If a Mermaid render is poor, the agent switches immediately to an explicit SVG layout and keeps any existing `.mmd` as the logical model. Direct SVG diagrams do not require a `.mmd` companion. SVG can be delivered directly or rendered to a white-background PNG as needed.
+If Mermaid is unsuitable, the agent starts directly with SVG without a trial render. If a Mermaid render is poor, the agent switches immediately to an explicit SVG layout and keeps any existing `.mmd` as the logical model. When a direct SVG has relationships that Mermaid can express faithfully, the agent also keeps a companion `.mmd` so the topology remains reviewable. SVG can be delivered directly or rendered to a white-background PNG as needed.
 
 The Mermaid rendering entry point is:
 
 ```bash
 <skill-dir>/scripts/render-mermaid.sh input.mmd output.png
 ```
+
+Before publishing a diagram, check the local image references in the edited
+Markdown document. The checker follows relative paths from each Markdown file,
+handles both `![alt](image.svg)` and HTML `<img src="image.svg">`, and ignores
+remote URLs, data URLs, and fragment-only links:
+
+```bash
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md docs/design
+```
+
+It prints each local reference with its source line and exits with status `0`
+when every local image exists, `1` when one or more local images are missing,
+and `2` when an input file cannot be read or does not exist.
+
+For authored SVG, run the dependency-free structural check before visual review:
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+```
+
+The validator checks XML, canvas metadata, explicit white background coverage,
+text positioning, marker references, duplicate IDs, and duplicate path geometry.
+It reports warnings separately and `--strict` treats warnings as failures.
 
 See [`draw-technical-diagrams/SKILL.md`](draw-technical-diagrams/SKILL.md) for the complete agent workflow and verification rules.
 
