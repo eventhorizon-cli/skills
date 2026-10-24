@@ -1,0 +1,3 @@
+interface:
+  display_name: ".NET GitHub Workflows"
+  short_description: "Create .NET CI and NuGet release workflows"
