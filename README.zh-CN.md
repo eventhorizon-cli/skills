@@ -2,86 +2,96 @@
 
 [English](README.md) | 简体中文
 
-这是一个面向 AI 编程 Agent 的可复用 Skills 仓库。目前包含 `draw-technical-diagrams`，用于创建和修改技术流程图、系统架构图、组件图和数据流图。
+这是一个面向 AI 编程 Agent 的可复用 Skills 仓库，提供技术绘图和博客园 Markdown 版本生成能力。
 
-> **兼容性说明：** 这个 Skill 目前只在 macOS 上通过 Codex 完成了实际测试，因此当前只保证在 macOS 上可用。Windows 和 Linux 尚未经过验证，可能会因为依赖、路径或脚本差异而无法运行。其他 Agent 理论上也可以使用，但安装目录和调用方式可能不同。
+[Skill 目录](#skill-目录) · [安装](#安装) · [兼容性](#兼容性)
 
-## 当前包含的 Skills
+## Skill 目录
 
-| Skill | 说明 |
-| --- | --- |
-| [`draw-technical-diagrams`](draw-technical-diagrams) | 根据文字、代码或已有草图生成可读的技术图，并渲染和检查最终图片。 |
+| Skill | 用途 | 产物 |
+| --- | --- | --- |
+| [技术绘图](#技术绘图) | 根据文字、代码或草图生成并检查技术图 | 图片与可编辑图源 |
+| [生成博客园版本](#生成博客园版本) | 使用已安装的 `dotnet-cnblog` 转换 Markdown 文章 | 替换好图片链接的 `*-cnblog.md` |
 
-## 它能做什么
-
-`draw-technical-diagrams` 为 Agent 提供了一套可重复执行的技术绘图流程：
-
-- 绘制流程图、系统架构图、组件图和数据流图。
-- 保留可编辑源文件：使用 Mermaid 时保留 `.mmd`，直接绘制 SVG 时保留 `.svg`。
-- 区分忠实重绘和语义优先的新图，避免在重绘已有图时悄悄改变拓扑关系。
-- 使用 Mermaid 时，通过固定版本的 Mermaid CLI 输出白底 PNG、SVG 或 PDF。
-- 在视觉检查前运行不依赖第三方包的 SVG 结构校验和 Markdown 图片链接校验。
-- 检查裁切、文字遮挡、连线歧义、箭头方向和异常长宽比。
-- 判断 Mermaid 不适合时直接绘制 SVG；Mermaid 成图效果不好时也立即切换 SVG。
-
-## 环境要求
-
-当前经过验证的运行环境为 macOS 和 Codex（或其他能够加载这种 Skill 格式的 Agent）。Mermaid 渲染脚本还需要：
-
-- Bash。
-- Node.js 和 `npx`。
-- 可用的无头 Chrome 或 Chromium 环境。在已经验证的 macOS 环境中，脚本会优先使用 `/Applications` 中的 Google Chrome，否则交给 Mermaid CLI/Puppeteer 按默认方式处理。
-- 第一次渲染时能够联网下载 Mermaid CLI。
-
-直接编写 SVG 不依赖 Mermaid CLI 及其运行环境。如果需要从 SVG 输出 PNG，则需要可用的 SVG 渲染器。
+两个 Skill 可以按需安装。识别后可直接用自然语言提出需求，也可通过 `$skill-name` 显式调用。
 
 ## 安装
 
-如果当前 Agent 支持从 GitHub 安装 Skill，可以直接把 Skill 地址交给它：
+如果当前 Agent 支持从 GitHub 安装 Skill，可以直接交给它下面的地址：
 
 ```text
-请安装并使用下面的 Skill：
 https://github.com/eventhorizon-cli/skills/tree/main/draw-technical-diagrams
+https://github.com/eventhorizon-cli/skills/tree/main/generate-cnblogs-version
 ```
 
-在 Codex 中手动安装时，可以克隆仓库，再将 Skill 复制到 Codex 的 Skills 目录：
+在 Codex 中手动安装时，可以克隆仓库并复制需要的 Skill：
 
 ```bash
 git clone --depth 1 https://github.com/eventhorizon-cli/skills.git
 mkdir -p ~/.codex/skills
+
+# 技术绘图
 cp -R skills/draw-technical-diagrams ~/.codex/skills/
+
+# 生成博客园版本
+cp -R skills/generate-cnblogs-version ~/.codex/skills/
 ```
 
-如果当前任务没有识别到刚安装的 Skill，可以重启 Codex，或者重新打开一个任务。使用其他 Agent 时，需要将目录复制到对应 Agent 支持的 Skills 位置。
+如果安装后未识别，可以新建任务或重启 Agent。其他 Agent 的安装目录可能不同。
 
-## 使用方式
+## 技术绘图
 
-Skill 安装并被识别后，直接要求 Agent 绘制或修改技术图，通常就会自动触发。在 Codex 中，也可以使用 `$draw-technical-diagrams` 显式调用。
+[`draw-technical-diagrams`](draw-technical-diagrams/SKILL.md)
 
-简单的流程图只需要提供主要步骤：
+根据文字、代码或已有草图，绘制流程图、系统架构图、组件图和数据流图。
+
+修改图之前，先选择工作模式：
+
+- **忠实重绘**：已有图片、截图或手绘草图是事实来源时使用。保留可观察到的节点、连线、标签、分组和大致布局，不要悄悄改写拓扑关系。
+- **语义优先创建**：没有需要保留的已有图片时使用。绘图前先提取节点名称、归属、方向关系、分支条件、时序状态和其他语义要求。
+
+保持工作模式明确。已有图存在歧义时，保留可观察到的结构并说明不确定之处，不要自行补出新的关系。
+
+标准流程和时序适合自动布局时使用 Mermaid。有 Node.js 且没有已知环境阻碍时，允许轻量尝试一次 Mermaid 渲染。需要精确排布、固定对齐、密集的跨分组连线或可控路由时，直接编写 SVG。Mermaid 运行环境、浏览器或依赖下载受阻，或者成图效果不好时，直接切换到 SVG。保留可编辑图源：Mermaid 使用 `.mmd`，直接绘制使用 `.svg`。如果 SVG 的关系可以用 Mermaid 准确表达，也保留 `.mmd` 逻辑模型，即使 Mermaid 无法运行。
+
+- 架构图和数据流图默认使用从左到右的布局；简短且天然适合纵向阅读的流程可以使用从上到下的布局。
+- 分组应对应真实的归属或部署边界；主要请求或数据流使用实线，发现、注册、心跳等控制面流量使用虚线。
+- 交付前检查最终图片是否裁切、文字拥挤、连线歧义、箭头方向错误或长宽比不合适。
+
+**调用示例**
 
 ```text
-请画一张订单提交流程图：
+使用 $draw-technical-diagrams 绘制订单提交流程图：
 
-用户提交订单 -> 校验订单 -> 写入数据库 -> 返回成功。
-校验失败时直接返回错误。
+提交订单 -> 校验 -> 写入数据库 -> 返回成功。
+校验失败时返回错误。
 
-请保留可编辑源文件（Mermaid 为 .mmd，直接绘制 SVG 为 .svg），并输出白底高分辨率 PNG。
+输出白底 PNG 并保留可编辑图源；逻辑可用 Mermaid 表达时，也保留 .mmd。
 ```
 
-面对更复杂的系统，可以补充组件、系统边界、连接关系和阅读方向：
+**环境要求**
 
-```text
-请读取当前项目并绘制系统架构图。
+| 绘制方式 | 依赖 |
+| --- | --- |
+| Mermaid | Bash、Node.js/`npx`、无头 Chrome/Chromium；首次运行可能下载固定版本的 Mermaid CLI |
+| 直接绘制 SVG | 不依赖 Mermaid；检查成图需要 SVG 查看器或渲染器，导出 PNG 需要可用的渲染器 |
 
-按照真实归属划分 API、应用服务、消息中间件、Consumer 和数据库。
-数据流使用实线，注册或发现关系使用虚线。
-请保留可编辑源文件（Mermaid 为 .mmd，直接绘制 SVG 为 .svg），并输出适合技术文章的白底高分辨率 PNG。
+Mermaid 渲染脚本为 [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh)，支持 PNG、SVG 和 PDF，并固定使用 Mermaid CLI `11.12.0`。
+
+**结构检查**
+
+打开渲染图片前，先运行 Skill 自带的检查脚本：
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
 ```
 
-复杂图不一定一次就能达到预期。如果结果不合适，可以继续与 Agent 沟通，并指出具体问题，例如箭头连接到了错误的节点、图片太宽，或者某些细节应该拆成另一张图。由于图源会被保留，Agent 可以继续修改并重新渲染，不需要从头开始。
+`validate-svg.py` 会检查 XML、画布元数据、显式白色背景、文本位置、marker 引用、重复 ID 和重复路径几何。`check-markdown-diagrams.py` 会检查 Markdown 和 HTML 中的本地图片链接，按照 Markdown 文件所在目录解析相对路径，并跳过远程 URL、data URL 和只包含锚点的 URL。这些检查用于结构校验，不能代替最终图片的视觉检查。
 
-## 仓库结构
+完整规则见 [Skill 说明](draw-technical-diagrams/SKILL.md)。
+
+**仓库结构**
 
 ```text
 draw-technical-diagrams/
@@ -99,53 +109,55 @@ draw-technical-diagrams/
     └── render-mermaid.sh
 ```
 
-## 实现原理
-
-Skill 会引导 Agent 按照下面的流程处理：
+**处理流程**
 
 ```text
 原始材料
   -> 识别组件和关系
+  -> 选择忠实重绘或语义优先创建
   -> 判断 Mermaid 是否适合当前布局
   -> 生成 Mermaid 图源或直接编写 SVG
   -> 渲染所需图片格式
-  -> 检查最终图片
-  -> Mermaid 成图效果不好时直接切换 SVG
-  -> 验证最终成图
+  -> 检查并验证最终成图
 ```
 
-如果判断 Mermaid 不适合，Agent 会直接绘制 SVG，无需先试画 Mermaid。如果 Mermaid 成图效果不好，也会立即改用显式 SVG 布局，并保留已有的 `.mmd` 作为逻辑关系记录。只要直接绘制的 SVG 关系可以用 Mermaid 准确表达，Agent 也会保留配套的 `.mmd`，方便复核拓扑关系。最终可以直接交付 SVG，或按需输出白底 PNG。
+## 生成博客园版本
 
-Mermaid 渲染脚本的调用方式如下：
+[`generate-cnblogs-version`](generate-cnblogs-version/SKILL.md) · 显示名称：**生成博客园版本**
+
+调用已安装的 .NET 程序 [dotnet-cnblog](https://github.com/stulzq/dotnet-cnblogs-tool)，生成可粘贴到博客园 Markdown 编辑器的文章版本。
+
+- 先直接执行工具，遇到报错或输出不完整时再排查。
+- 通过已配置的博客园账号上传文章中的本地图片，并替换为远程链接。
+- 保留原稿，生成 `article-cnblog.md`；不会发布或更新博客文章。
+
+**调用示例**
+
+```text
+使用 $generate-cnblogs-version 为 docs/article.md 生成博客园版本。
+```
+
+文章已明确时，也可以直接说“生成博客园版本”或“转成博客园格式”。
+
+**工具与配置**
+
+复用现有安装和账号配置，执行命令为：
 
 ```bash
-<skill-dir>/scripts/render-mermaid.sh input.mmd output.png
+dotnet-cnblog proc -f "/absolute/path/article.md"
 ```
 
-发布图之前，可以先检查正在编辑的 Markdown 中的本地图片引用。这个脚本
-会按照每个 Markdown 文件所在目录解析相对路径，支持 `![alt](image.svg)`
-和 HTML 的 `<img src="image.svg">` 两种写法，并跳过远程 URL、data URL
-以及只包含锚点的链接：
+如果运行时发现工具未安装，Agent 会提供[上游项目链接](https://github.com/stulzq/dotnet-cnblogs-tool)并提示：
 
 ```bash
-python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md docs/design
+dotnet tool install --global dotnet-cnblog
 ```
 
-脚本会输出每个本地引用及其所在行。所有本地图片都存在时退出码为 `0`；
-发现一个或多个缺失图片时退出码为 `1`；输入文件不存在或无法读取时退出码
-为 `2`。
+需要配置账号时，在本机按工具提示操作，MetaWeblog Token 来自[博客园设置](https://i.cnblogs.com/settings)。转换失败的处理方式见 [Skill 说明](generate-cnblogs-version/SKILL.md)。
 
-对于直接编写的 SVG，可以在视觉检查前运行不依赖第三方包的结构检查：
+## 兼容性
 
-```bash
-python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
-```
-
-这个校验器会检查 XML、画布元数据、显式白色背景覆盖、文本定位、marker
-引用、重复 ID 和重复路径几何。警告会单独输出，加入 `--strict` 后警告也会
-使校验失败。
-
-完整的 Agent 工作流和图片检查规则可以查看 [`draw-technical-diagrams/SKILL.md`](draw-technical-diagrams/SKILL.md)。
+目前仅在 Codex 和 macOS 环境中使用验证。Windows、Linux 以及其他 Agent 尚未验证。各 Skill 的依赖分别列在对应章节中，安装其中一个 Skill 不需要安装另一个 Skill 的工具。
 
 ## 许可证
 

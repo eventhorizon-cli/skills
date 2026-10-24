@@ -2,89 +2,102 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Reusable skills for AI coding agents. This repository currently contains `draw-technical-diagrams`, a skill for creating and revising technical flowcharts, system architecture diagrams, component diagrams, and data-flow diagrams.
+Reusable skills for AI coding agents: create technical diagrams and prepare Markdown articles for CNBlogs.
 
-> **Compatibility:** This skill has only been tested with Codex on macOS, so macOS is currently the only supported platform. Windows and Linux have not been verified and may not work because of dependency, path, or script differences. Other agents may be able to use the skill, but their installation paths and invocation methods can differ.
+[Skill catalog](#skill-catalog) · [Installation](#installation) · [Compatibility](#compatibility)
 
-## Available Skills
+## Skill catalog
 
-| Skill | Description |
-| --- | --- |
-| [`draw-technical-diagrams`](draw-technical-diagrams) | Creates readable technical diagrams from prose, code, or an existing sketch, then renders and verifies the final image. |
+| Skill | Use it to | Output |
+| --- | --- | --- |
+| [Technical diagrams](#technical-diagrams) | Draw or revise flowcharts, architecture diagrams, and data flows | Rendered images and editable diagram sources |
+| [生成博客园版本 · CNBlogs version](#cnblogs-version) | Convert a Markdown article using the installed `dotnet-cnblog` tool | A separate `*-cnblog.md` with hosted image links |
 
-## What It Does
-
-`draw-technical-diagrams` gives an agent a repeatable workflow for technical diagrams:
-
-- Creates flowcharts, architecture diagrams, component diagrams, and data-flow diagrams.
-- Preserves editable source: `.mmd` for Mermaid and `.svg` for directly authored layouts.
-- Separates faithful redraws from semantic-first creation so an existing diagram is not silently redesigned.
-- Renders white-background PNG, SVG, or PDF files with a pinned Mermaid CLI version when using Mermaid.
-- Runs dependency-free SVG and Markdown link checks before visual review.
-- Checks clipping, text overlap, ambiguous connections, arrow direction, and unsuitable aspect ratios.
-- Uses direct SVG from the start when Mermaid is unsuitable, or switches immediately when Mermaid's rendered result is poor.
-
-## Requirements
-
-The currently verified setup uses macOS and Codex, or another agent that can load skills in this format. The Mermaid rendering script additionally requires:
-
-- Bash.
-- Node.js and `npx`.
-- A headless Chrome or Chromium environment. On the verified macOS setup, the script prefers Google Chrome from `/Applications` and otherwise falls back to the Mermaid CLI/Puppeteer default.
-- Network access on the first render to download Mermaid CLI.
-
-Direct SVG authoring does not require the Mermaid CLI stack. PNG output from SVG requires an available SVG renderer.
+Install either skill or both. Once recognized by your agent, use a natural-language request or invoke its `$skill-name` explicitly.
 
 ## Installation
 
-If your agent can install a skill from GitHub, give it the skill URL:
+**Ask your agent to install the skill you need** using its GitHub URL:
 
 ```text
-Install and use this skill:
+Install this skill:
 https://github.com/eventhorizon-cli/skills/tree/main/draw-technical-diagrams
 ```
 
-For a manual Codex installation, clone the repository and copy the skill into the Codex skills directory:
+```text
+Install this skill:
+https://github.com/eventhorizon-cli/skills/tree/main/generate-cnblogs-version
+```
+
+**For a manual Codex installation**, clone the repository and copy the directories you need:
 
 ```bash
 git clone --depth 1 https://github.com/eventhorizon-cli/skills.git
 mkdir -p ~/.codex/skills
+
+# Technical diagrams
 cp -R skills/draw-technical-diagrams ~/.codex/skills/
+
+# CNBlogs version
+cp -R skills/generate-cnblogs-version ~/.codex/skills/
 ```
 
-Restart Codex or open a new task if the current task does not recognize the newly installed skill. For another agent, copy the directory to that agent's supported skills location.
+If a newly installed skill is not recognized, open a new task or restart your agent. Other agents may use different installation directories.
 
-## Usage
+## Technical diagrams
 
-Once installed and recognized, the skill can be selected automatically when you ask the agent to draw or revise a technical diagram. In Codex, you can also invoke it explicitly with `$draw-technical-diagrams`.
+[`draw-technical-diagrams`](draw-technical-diagrams/SKILL.md)
 
-A simple request can start with a short process:
+Create flowcharts, system architecture diagrams, component diagrams, and data-flow diagrams from prose, code, or an existing sketch.
+
+Before changing a diagram, choose the work mode:
+
+- **Faithful redraw** applies when an existing image, screenshot, or sketch is the source of truth. Preserve its observable nodes, edges, labels, grouping, and approximate geometry without silently redesigning the topology.
+- **Semantic-first creation** applies when there is no existing image to preserve. Extract the node names, ownership, directed edges, branch conditions, timing states, and other semantic requirements before drawing.
+
+Keep the chosen mode explicit. If an existing diagram is ambiguous, preserve the observable structure and call out the uncertainty instead of inventing a relationship.
+
+Choose Mermaid for standard flows and sequences when automatic layout is clear. With Node.js available, allow one lightweight Mermaid render attempt unless an environment blocker is already known. Use directly authored SVG when precise placement, fixed alignment, dense cross-group connections, or controlled routing is needed. If Mermaid is unavailable, blocked by its runtime or browser, or produces a poor layout, switch directly to SVG. Keep editable sources: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep a `.mmd` logical model when Mermaid can faithfully express the relationships, even if Mermaid cannot run.
+
+- Use left-to-right layouts for architecture and data-flow diagrams unless a short process naturally reads vertically.
+- Keep groups tied to real ownership or deployment boundaries, use solid arrows for primary requests or data flow, and dashed arrows for discovery, registration, heartbeats, or other control-plane traffic.
+- Inspect the rendered image for clipping, crowded text, ambiguous arrows, wrong arrow direction, and unsuitable proportions before delivery.
+
+**Try it**
 
 ```text
-Draw an order submission flow:
+Use $draw-technical-diagrams to draw this order flow:
 
-Submit order -> validate order -> save to database -> return success.
+Submit order -> validate -> save to database -> return success.
 Return an error when validation fails.
 
-Keep the editable source (.mmd for Mermaid or .svg for direct SVG) and export
-a high-resolution PNG with a white background.
+Export a white-background PNG and keep editable sources, including a .mmd
+logical model when the relationships can be represented in Mermaid.
 ```
 
-For a more complex system, provide components, boundaries, connections, and the intended reading direction:
+**Dependencies**
 
-```text
-Read the current project and draw its system architecture.
+| Rendering path | Requirements |
+| --- | --- |
+| Mermaid | Bash, Node.js/`npx`, and headless Chrome/Chromium; the first run may download the pinned Mermaid CLI |
+| Direct SVG | No Mermaid runtime required; a working SVG viewer or renderer is needed for visual verification and PNG export |
 
-Separate the API, application service, message broker, consumer, and database
-into their real ownership boundaries. Use solid lines for data flow and dashed
-lines for registration or discovery. Keep the editable source (.mmd for
-Mermaid or .svg for direct SVG) and export a high-resolution white-background
-PNG suitable for a technical article.
+The Mermaid rendering script is [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh). It supports PNG, SVG, and PDF output and pins Mermaid CLI `11.12.0`.
+
+**Static checks**
+
+Run the bundled checks before opening the rendered image:
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
 ```
 
-A complex diagram may not match your expectations on the first attempt. Continue the conversation and point out concrete problems, such as an arrow connected to the wrong node, an image that is too wide, or details that should be moved into a separate diagram. Because the source is preserved, the agent can revise and render the existing diagram instead of starting over.
+`validate-svg.py` checks XML, canvas metadata, an explicit white background, text positioning, marker references, duplicate IDs, and duplicate path geometry. `check-markdown-diagrams.py` checks local Markdown and HTML image links, resolving relative paths from each Markdown file while ignoring remote, data, and fragment-only URLs. These checks are structural gates and do not replace visual inspection.
 
-## Repository Layout
+For more detail, see the [skill instructions](draw-technical-diagrams/SKILL.md).
+
+**Repository layout**
 
 ```text
 draw-technical-diagrams/
@@ -102,54 +115,56 @@ draw-technical-diagrams/
     └── render-mermaid.sh
 ```
 
-## How It Works
-
-The skill guides the agent through this workflow:
+**How it works**
 
 ```text
 Source material
   -> identify components and relationships
+  -> choose faithful redraw or semantic-first creation
   -> assess whether Mermaid suits the layout
   -> create Mermaid source or directly author SVG
   -> render the requested image format
-  -> inspect the rendered image
-  -> switch directly to SVG if Mermaid's result is poor
-  -> verify the final render
+  -> inspect and verify the final render
 ```
 
-If Mermaid is unsuitable, the agent starts directly with SVG without a trial render. If a Mermaid render is poor, the agent switches immediately to an explicit SVG layout and keeps any existing `.mmd` as the logical model. When a direct SVG has relationships that Mermaid can express faithfully, the agent also keeps a companion `.mmd` so the topology remains reviewable. SVG can be delivered directly or rendered to a white-background PNG as needed.
+## CNBlogs version
 
-The Mermaid rendering entry point is:
+[`generate-cnblogs-version`](generate-cnblogs-version/SKILL.md) · Display name: **生成博客园版本**
+
+Generate a Markdown copy ready for the CNBlogs Markdown editor, using the installed .NET program [dotnet-cnblog](https://github.com/stulzq/dotnet-cnblogs-tool).
+
+- Run the existing tool directly, then investigate only if it fails or produces an incomplete result.
+- Upload the article's local images to the configured CNBlogs account and replace their references with hosted URLs.
+- Preserve the original and return `article-cnblog.md`. This prepares a file; it does not publish or update a blog post.
+
+**Try it**
+
+```text
+Use $generate-cnblogs-version to generate a CNBlogs version of docs/article.md.
+```
+
+You can also say “生成博客园版本” or “转成博客园格式” when the article is clear from the conversation.
+
+**Tool and setup**
+
+The skill reuses your existing installation and account configuration. Its main command is:
 
 ```bash
-<skill-dir>/scripts/render-mermaid.sh input.mmd output.png
+dotnet-cnblog proc -f "/absolute/path/article.md"
 ```
 
-Before publishing a diagram, check the local image references in the edited
-Markdown document. The checker follows relative paths from each Markdown file,
-handles both `![alt](image.svg)` and HTML `<img src="image.svg">`, and ignores
-remote URLs, data URLs, and fragment-only links:
+If the tool is missing, the agent points to the [upstream project](https://github.com/stulzq/dotnet-cnblogs-tool) and suggests:
 
 ```bash
-python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md docs/design
+dotnet tool install --global dotnet-cnblog
 ```
 
-It prints each local reference with its source line and exits with status `0`
-when every local image exists, `1` when one or more local images are missing,
-and `2` when an input file cannot be read or does not exist.
+If account setup is needed, complete the tool's prompts locally with a MetaWeblog token from [CNBlogs settings](https://i.cnblogs.com/settings). See the [skill instructions](generate-cnblogs-version/SKILL.md) for handling conversion failures.
 
-For authored SVG, run the dependency-free structural check before visual review:
+## Compatibility
 
-```bash
-python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
-```
-
-The validator checks XML, canvas metadata, explicit white background coverage,
-text positioning, marker references, duplicate IDs, and duplicate path geometry.
-It reports warnings separately and `--strict` treats warnings as failures.
-
-See [`draw-technical-diagrams/SKILL.md`](draw-technical-diagrams/SKILL.md) for the complete agent workflow and verification rules.
+The current usage and verification environment is **Codex on macOS**. Windows, Linux, and other agents have not been verified. Dependencies are listed under each skill; installing one skill does not require the other skill's tools.
 
 ## License
 
-This repository is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE).
