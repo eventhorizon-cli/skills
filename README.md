@@ -57,7 +57,7 @@ Before changing a diagram, choose the work mode:
 
 Keep the chosen mode explicit. If an existing diagram is ambiguous, preserve the observable structure and call out the uncertainty instead of inventing a relationship.
 
-Choose Mermaid for standard flows and sequences when automatic layout is clear. With Node.js available, allow one lightweight Mermaid render attempt unless an environment blocker is already known. Use directly authored SVG when precise placement, fixed alignment, dense cross-group connections, or controlled routing is needed. If Mermaid is unavailable, blocked by its runtime or browser, or produces a poor layout, switch directly to SVG. Keep editable sources: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep a `.mmd` logical model when Mermaid can faithfully express the relationships, even if Mermaid cannot run.
+Choose Mermaid for standard flows and sequences when automatic layout is clear. Use directly authored SVG when precise placement, fixed alignment, dense cross-group connections, or controlled routing is needed. If Mermaid is unavailable, blocked by its runtime or browser, or produces a poor layout, switch directly to SVG. Keep editable sources: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep a `.mmd` logical model when Mermaid can faithfully express the relationships, even if Mermaid cannot run.
 
 - Use left-to-right layouts for architecture and data-flow diagrams unless a short process naturally reads vertically.
 - Keep groups tied to real ownership or deployment boundaries, use solid arrows for primary requests or data flow, and dashed arrows for discovery, registration, heartbeats, or other control-plane traffic.
