@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 
 Reusable skills for AI coding agents: create technical diagrams and prepare Markdown articles for CNBlogs.
 
-[Skill catalog](#skill-catalog) · [Installation](#installation) · [Compatibility](#compatibility)
+[Skill catalog](#skill-catalog) · [Installation](#installation) · [Repository layout](#repository-layout) · [Compatibility](#compatibility)
 
 ## Skill catalog
 
@@ -21,32 +21,32 @@ Install either skill or both. Once recognized by your agent, use a natural-langu
 
 ```text
 Install this skill:
-https://github.com/eventhorizon-cli/skills/tree/main/draw-technical-diagrams
+https://github.com/eventhorizon-cli/skills/tree/main/skills/draw-technical-diagrams
 ```
 
 ```text
 Install this skill:
-https://github.com/eventhorizon-cli/skills/tree/main/generate-cnblogs-version
+https://github.com/eventhorizon-cli/skills/tree/main/skills/generate-cnblogs-version
 ```
 
 **For a manual Codex installation**, clone the repository and copy the directories you need:
 
 ```bash
-git clone --depth 1 https://github.com/eventhorizon-cli/skills.git
+git clone --depth 1 https://github.com/eventhorizon-cli/skills.git agent-skills
 mkdir -p ~/.codex/skills
 
 # Technical diagrams
-cp -R skills/draw-technical-diagrams ~/.codex/skills/
+cp -R agent-skills/skills/draw-technical-diagrams ~/.codex/skills/
 
 # CNBlogs version
-cp -R skills/generate-cnblogs-version ~/.codex/skills/
+cp -R agent-skills/skills/generate-cnblogs-version ~/.codex/skills/
 ```
 
 If a newly installed skill is not recognized, open a new task or restart your agent. Other agents may use different installation directories.
 
 ## Technical diagrams
 
-[`draw-technical-diagrams`](draw-technical-diagrams/SKILL.md)
+[`draw-technical-diagrams`](skills/draw-technical-diagrams/SKILL.md)
 
 Create flowcharts, system architecture diagrams, component diagrams, and data-flow diagrams from prose, code, or an existing sketch.
 
@@ -82,7 +82,7 @@ logical model when the relationships can be represented in Mermaid.
 | Mermaid | Bash, Node.js/`npx`, and headless Chrome/Chromium; the first run may download the pinned Mermaid CLI |
 | Direct SVG | No Mermaid runtime required; a working SVG viewer or renderer is needed for visual verification and PNG export |
 
-The Mermaid rendering script is [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh). It supports PNG, SVG, and PDF output and pins Mermaid CLI `11.12.0`.
+The Mermaid rendering script is [`render-mermaid.sh`](skills/draw-technical-diagrams/scripts/render-mermaid.sh). It supports PNG, SVG, and PDF output and pins Mermaid CLI `11.12.0`.
 
 **Static checks**
 
@@ -95,25 +95,7 @@ python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
 
 `validate-svg.py` checks XML, canvas metadata, an explicit white background, text positioning, marker references, duplicate IDs, and duplicate path geometry. `check-markdown-diagrams.py` checks local Markdown and HTML image links, resolving relative paths from each Markdown file while ignoring remote, data, and fragment-only URLs. These checks are structural gates and do not replace visual inspection.
 
-For more detail, see the [skill instructions](draw-technical-diagrams/SKILL.md).
-
-**Repository layout**
-
-```text
-draw-technical-diagrams/
-├── SKILL.md
-├── agents/
-│   └── openai.yaml
-├── assets/
-│   ├── mermaid.config.json
-│   └── puppeteer.macos.json
-├── references/
-│   └── layout-patterns.md
-└── scripts/
-    ├── check-markdown-diagrams.py
-    ├── validate-svg.py
-    └── render-mermaid.sh
-```
+For more detail, see the [skill instructions](skills/draw-technical-diagrams/SKILL.md).
 
 **How it works**
 
@@ -129,7 +111,7 @@ Source material
 
 ## CNBlogs version
 
-[`generate-cnblogs-version`](generate-cnblogs-version/SKILL.md) · Display name: **生成博客园版本**
+[`generate-cnblogs-version`](skills/generate-cnblogs-version/SKILL.md) · Display name: **生成博客园版本**
 
 Generate a Markdown copy ready for the CNBlogs Markdown editor, using the installed .NET program [dotnet-cnblog](https://github.com/stulzq/dotnet-cnblogs-tool).
 
@@ -159,7 +141,19 @@ If the tool is missing, the agent points to the [upstream project](https://githu
 dotnet tool install --global dotnet-cnblog
 ```
 
-If account setup is needed, complete the tool's prompts locally with a MetaWeblog token from [CNBlogs settings](https://i.cnblogs.com/settings). See the [skill instructions](generate-cnblogs-version/SKILL.md) for handling conversion failures.
+If account setup is needed, complete the tool's prompts locally with a MetaWeblog token from [CNBlogs settings](https://i.cnblogs.com/settings). See the [skill instructions](skills/generate-cnblogs-version/SKILL.md) for handling conversion failures.
+
+## Repository layout
+
+```text
+.
+├── README.md
+├── README.zh-CN.md
+├── LICENSE
+└── skills/
+    ├── draw-technical-diagrams/
+    └── generate-cnblogs-version/
+```
 
 ## Compatibility
 

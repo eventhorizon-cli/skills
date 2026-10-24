@@ -4,7 +4,7 @@
 
 这是一个面向 AI 编程 Agent 的可复用 Skills 仓库，提供技术绘图和博客园 Markdown 版本生成能力。
 
-[Skill 目录](#skill-目录) · [安装](#安装) · [兼容性](#兼容性)
+[Skill 目录](#skill-目录) · [安装](#安装) · [仓库结构](#仓库结构) · [兼容性](#兼容性)
 
 ## Skill 目录
 
@@ -20,28 +20,28 @@
 如果当前 Agent 支持从 GitHub 安装 Skill，可以直接交给它下面的地址：
 
 ```text
-https://github.com/eventhorizon-cli/skills/tree/main/draw-technical-diagrams
-https://github.com/eventhorizon-cli/skills/tree/main/generate-cnblogs-version
+https://github.com/eventhorizon-cli/skills/tree/main/skills/draw-technical-diagrams
+https://github.com/eventhorizon-cli/skills/tree/main/skills/generate-cnblogs-version
 ```
 
 在 Codex 中手动安装时，可以克隆仓库并复制需要的 Skill：
 
 ```bash
-git clone --depth 1 https://github.com/eventhorizon-cli/skills.git
+git clone --depth 1 https://github.com/eventhorizon-cli/skills.git agent-skills
 mkdir -p ~/.codex/skills
 
 # 技术绘图
-cp -R skills/draw-technical-diagrams ~/.codex/skills/
+cp -R agent-skills/skills/draw-technical-diagrams ~/.codex/skills/
 
 # 生成博客园版本
-cp -R skills/generate-cnblogs-version ~/.codex/skills/
+cp -R agent-skills/skills/generate-cnblogs-version ~/.codex/skills/
 ```
 
 如果安装后未识别，可以新建任务或重启 Agent。其他 Agent 的安装目录可能不同。
 
 ## 技术绘图
 
-[`draw-technical-diagrams`](draw-technical-diagrams/SKILL.md)
+[`draw-technical-diagrams`](skills/draw-technical-diagrams/SKILL.md)
 
 根据文字、代码或已有草图，绘制流程图、系统架构图、组件图和数据流图。
 
@@ -76,7 +76,7 @@ cp -R skills/generate-cnblogs-version ~/.codex/skills/
 | Mermaid | Bash、Node.js/`npx`、无头 Chrome/Chromium；首次运行可能下载固定版本的 Mermaid CLI |
 | 直接绘制 SVG | 不依赖 Mermaid；检查成图需要 SVG 查看器或渲染器，导出 PNG 需要可用的渲染器 |
 
-Mermaid 渲染脚本为 [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh)，支持 PNG、SVG 和 PDF，并固定使用 Mermaid CLI `11.12.0`。
+Mermaid 渲染脚本为 [`render-mermaid.sh`](skills/draw-technical-diagrams/scripts/render-mermaid.sh)，支持 PNG、SVG 和 PDF，并固定使用 Mermaid CLI `11.12.0`。
 
 **结构检查**
 
@@ -89,25 +89,7 @@ python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
 
 `validate-svg.py` 会检查 XML、画布元数据、显式白色背景、文本位置、marker 引用、重复 ID 和重复路径几何。`check-markdown-diagrams.py` 会检查 Markdown 和 HTML 中的本地图片链接，按照 Markdown 文件所在目录解析相对路径，并跳过远程 URL、data URL 和只包含锚点的 URL。这些检查用于结构校验，不能代替最终图片的视觉检查。
 
-完整规则见 [Skill 说明](draw-technical-diagrams/SKILL.md)。
-
-**仓库结构**
-
-```text
-draw-technical-diagrams/
-├── SKILL.md
-├── agents/
-│   └── openai.yaml
-├── assets/
-│   ├── mermaid.config.json
-│   └── puppeteer.macos.json
-├── references/
-│   └── layout-patterns.md
-└── scripts/
-    ├── check-markdown-diagrams.py
-    ├── validate-svg.py
-    └── render-mermaid.sh
-```
+完整规则见 [Skill 说明](skills/draw-technical-diagrams/SKILL.md)。
 
 **处理流程**
 
@@ -123,7 +105,7 @@ draw-technical-diagrams/
 
 ## 生成博客园版本
 
-[`generate-cnblogs-version`](generate-cnblogs-version/SKILL.md) · 显示名称：**生成博客园版本**
+[`generate-cnblogs-version`](skills/generate-cnblogs-version/SKILL.md) · 显示名称：**生成博客园版本**
 
 调用已安装的 .NET 程序 [dotnet-cnblog](https://github.com/stulzq/dotnet-cnblogs-tool)，生成可粘贴到博客园 Markdown 编辑器的文章版本。
 
@@ -153,7 +135,19 @@ dotnet-cnblog proc -f "/absolute/path/article.md"
 dotnet tool install --global dotnet-cnblog
 ```
 
-需要配置账号时，在本机按工具提示操作，MetaWeblog Token 来自[博客园设置](https://i.cnblogs.com/settings)。转换失败的处理方式见 [Skill 说明](generate-cnblogs-version/SKILL.md)。
+需要配置账号时，在本机按工具提示操作，MetaWeblog Token 来自[博客园设置](https://i.cnblogs.com/settings)。转换失败的处理方式见 [Skill 说明](skills/generate-cnblogs-version/SKILL.md)。
+
+## 仓库结构
+
+```text
+.
+├── README.md
+├── README.zh-CN.md
+├── LICENSE
+└── skills/
+    ├── draw-technical-diagrams/
+    └── generate-cnblogs-version/
+```
 
 ## 兼容性
 
