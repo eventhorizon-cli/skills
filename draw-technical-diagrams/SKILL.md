@@ -7,18 +7,29 @@ description: Create and revise technical flowcharts, system architecture diagram
 
 Create readable technical diagrams with Mermaid or directly authored SVG, choosing the tool that produces the clearest result. Prefer restrained, documentation-oriented visuals over decorative illustrations.
 
+## Choose the work mode
+
+Choose one mode before changing a diagram:
+
+- **Faithful redraw** applies when an existing image, screenshot, or hand-drawn sketch is the source of truth. Inspect the source at full size, record its nodes, edges, labels, grouping, and approximate geometry, then reproduce that structure as editable SVG. Preserve the original image unless the user explicitly asks to replace it. Do not redesign the topology or rename labels as part of vectorization.
+- **Semantic-first creation** applies when there is no existing image to preserve. Extract a small diagram contract from the source material before drawing: node names and ownership, directed edges, branch conditions, timing or waiting states, and any event that must not be implied as a write. Use that contract to choose the layout and review the final SVG or Mermaid source.
+
+Do not silently switch between these modes. If an existing diagram is ambiguous, preserve the observable structure and call out the uncertainty instead of inventing a new relationship.
+
 ## Workflow
 
 1. Inspect the source material and destination document. Preserve component names, directions, protocol boundaries, and control/data-path distinctions.
-2. Choose the smallest diagram type that explains the relationship and assess whether Mermaid suits its layout and the available environment (see **Choose Mermaid or SVG**):
+2. Select **Faithful redraw** or **Semantic-first creation**, then write down the topology contract before drawing. For a new diagram, keep the contract in the `.mmd` source or a short adjacent note so later edits can be checked against it.
+3. Choose the smallest diagram type that explains the relationship and assess whether Mermaid suits its layout and the available environment (see **Choose Mermaid or SVG**):
    - Use a flowchart for architecture, components, message paths, and operational flows.
    - Use a sequence diagram only when request order or timing is the main point.
    - Split unrelated concerns into separate diagrams instead of crowding one image.
-3. Read [layout-patterns.md](references/layout-patterns.md) when selecting layout, styling architecture roles, or fixing an awkward render.
-4. Keep editable sources next to the output image unless the user requests a temporary artifact: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep or create a `.mmd` logical model whenever Mermaid can faithfully express the relationships (see **Direct SVG**).
-5. Render Mermaid with `scripts/render-mermaid.sh`; render directly authored SVG as described under **Direct SVG**.
-6. Inspect dimensions and open the output image. If Mermaid's layout or visual quality is poor, switch directly to SVG. Inspect and revise the final render until labels, arrows, and groups are readable without clipping or overlap.
-7. Embed the image with a relative path when editing a local Markdown document.
+4. Read [layout-patterns.md](references/layout-patterns.md) when selecting layout, styling architecture roles, or fixing an awkward render.
+5. Keep editable sources next to the output image unless the user requests a temporary artifact: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep or create a `.mmd` logical model whenever Mermaid can faithfully express the relationships (see **Direct SVG**).
+6. Render Mermaid with `scripts/render-mermaid.sh`; render directly authored SVG as described under **Direct SVG**.
+7. Run the static checks in [Static checks](#static-checks) before visual review.
+8. Inspect dimensions and open the output image. If Mermaid's layout or visual quality is poor, switch directly to SVG. Inspect and revise the final render until labels, arrows, and groups are readable without clipping or overlap.
+9. Run the Markdown image-link check when embedding the image in documentation, then embed it with a relative path.
 
 ## Choose Mermaid or SVG
 
@@ -74,6 +85,17 @@ Supported Mermaid CLI outputs are PNG, SVG, and PDF. PNG defaults to `4×` rende
 
 The script pins Mermaid CLI `11.12.0`. Its first invocation can require a package download. With Node.js available, try it once if the current environment permits; if downloading dependencies or launching headless Chrome is blocked, follow the SVG path instead of automatically requesting elevated execution. Use an available trusted SVG renderer and verify its output.
 
+## Static checks
+
+Use the bundled checks before opening the rendered image:
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
+```
+
+`validate-svg.py` catches malformed SVG, missing viewBox or white background, text without a stable position, unresolved markers, and accidental duplicate path geometry. `check-markdown-diagrams.py` catches broken local Markdown and HTML image links. These checks are fast structural gates; they do not replace visual inspection of routing, spacing, or semantic meaning.
+
 ## Verify
 
 Check dimensions with an available native tool:
@@ -104,7 +126,7 @@ Then visually inspect the actual image, preferably with `view_image`. Confirm al
 - The aspect ratio is appropriate for both desktop and mobile article widths.
 - The image mode has no unwanted transparency when PNG was requested for publishing.
 
-Do not report completion until the rendered file, not only the Mermaid syntax, has passed these checks.
+Do not report completion until the rendered file, not only the Mermaid syntax, has passed these checks. If no SVG viewer or rasterizer is available, report the unverified preview explicitly instead of claiming visual verification.
 
 ## Direct SVG
 
@@ -116,4 +138,8 @@ Author the layout directly in SVG when selected upfront, when the environment ca
 - Keep the `.mmd` and SVG consistent when changing logic: check node names, edge directions, branch conditions, and sequence order against both sources. Omit the companion when Mermaid cannot faithfully express those semantics, or when the user excludes it; do not invent relationships to force a representation. Preserve existing valid Mermaid sources when switching to SVG.
 - Deliver SVG when the destination supports it or the user requests it. When PNG is needed, rasterize the SVG with an available trusted renderer on a white background at sufficient resolution for the destination.
 - Direct SVG authoring does not need Node.js, Mermaid CLI, or headless Chrome, but visual inspection and PNG export still need a working SVG viewer or renderer. If none is available, keep the SVG source and clearly report the unverified preview or unavailable export; do not claim verification or substitute SVG for an explicitly required PNG without explaining the limitation.
-- Visually inspect the final SVG or its rasterized preview, and any delivered PNG, using the same verification checks above. Valid SVG syntax alone is not sufficient.
+- Visually inspect the final SVG or its rasterized preview, and any delivered PNG, using the same verification checks above. Valid SVG syntax or a passing static check alone is not sufficient.
+
+## Bilingual diagrams
+
+When both English and Simplified Chinese are requested, keep the two sources isomorphic: the same node identifiers, edge directions, branch conditions, and visual positions must appear in both versions. Translate labels and explanatory notes only. Run the static SVG and Markdown checks for both language variants.

@@ -50,10 +50,18 @@ If a newly installed skill is not recognized, open a new task or restart your ag
 
 Create flowcharts, system architecture diagrams, component diagrams, and data-flow diagrams from prose, code, or an existing sketch.
 
-- Choose Mermaid for suitable layouts; use directly authored SVG when precise placement is needed or Mermaid renders poorly.
-- With Node.js available, allow one lightweight Mermaid attempt. If the runtime, dependency download, or sandbox blocks it, switch to SVG.
-- Keep editable sources. For SVG diagrams, also keep a `.mmd` logical model when Mermaid can faithfully express the relationships, even if Mermaid cannot run.
-- Inspect the rendered image for clipping, crowded text, ambiguous arrows, and unsuitable proportions before delivery.
+Before changing a diagram, choose the work mode:
+
+- **Faithful redraw** applies when an existing image, screenshot, or sketch is the source of truth. Preserve its observable nodes, edges, labels, grouping, and approximate geometry without silently redesigning the topology.
+- **Semantic-first creation** applies when there is no existing image to preserve. Extract the node names, ownership, directed edges, branch conditions, timing states, and other semantic requirements before drawing.
+
+Keep the chosen mode explicit. If an existing diagram is ambiguous, preserve the observable structure and call out the uncertainty instead of inventing a relationship.
+
+Choose Mermaid for standard flows and sequences when automatic layout is clear. With Node.js available, allow one lightweight Mermaid render attempt unless an environment blocker is already known. Use directly authored SVG when precise placement, fixed alignment, dense cross-group connections, or controlled routing is needed. If Mermaid is unavailable, blocked by its runtime or browser, or produces a poor layout, switch directly to SVG. Keep editable sources: `.mmd` for Mermaid and `.svg` for direct SVG. For SVG diagrams, also keep a `.mmd` logical model when Mermaid can faithfully express the relationships, even if Mermaid cannot run.
+
+- Use left-to-right layouts for architecture and data-flow diagrams unless a short process naturally reads vertically.
+- Keep groups tied to real ownership or deployment boundaries, use solid arrows for primary requests or data flow, and dashed arrows for discovery, registration, heartbeats, or other control-plane traffic.
+- Inspect the rendered image for clipping, crowded text, ambiguous arrows, wrong arrow direction, and unsuitable proportions before delivery.
 
 **Try it**
 
@@ -74,7 +82,50 @@ logical model when the relationships can be represented in Mermaid.
 | Mermaid | Bash, Node.js/`npx`, and headless Chrome/Chromium; the first run may download the pinned Mermaid CLI |
 | Direct SVG | No Mermaid runtime required; a working SVG viewer or renderer is needed for visual verification and PNG export |
 
-See the [skill instructions](draw-technical-diagrams/SKILL.md) for layout and verification rules. The Mermaid helper is available at [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh).
+The Mermaid rendering script is [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh). It supports PNG, SVG, and PDF output and pins Mermaid CLI `11.12.0`.
+
+**Static checks**
+
+Run the bundled checks before opening the rendered image:
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
+```
+
+`validate-svg.py` checks XML, canvas metadata, an explicit white background, text positioning, marker references, duplicate IDs, and duplicate path geometry. `check-markdown-diagrams.py` checks local Markdown and HTML image links, resolving relative paths from each Markdown file while ignoring remote, data, and fragment-only URLs. These checks are structural gates and do not replace visual inspection.
+
+For more detail, see the [skill instructions](draw-technical-diagrams/SKILL.md).
+
+**Repository layout**
+
+```text
+draw-technical-diagrams/
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+├── assets/
+│   ├── mermaid.config.json
+│   └── puppeteer.macos.json
+├── references/
+│   └── layout-patterns.md
+└── scripts/
+    ├── check-markdown-diagrams.py
+    ├── validate-svg.py
+    └── render-mermaid.sh
+```
+
+**How it works**
+
+```text
+Source material
+  -> identify components and relationships
+  -> choose faithful redraw or semantic-first creation
+  -> assess whether Mermaid suits the layout
+  -> create Mermaid source or directly author SVG
+  -> render the requested image format
+  -> inspect and verify the final render
+```
 
 ## CNBlogs version
 

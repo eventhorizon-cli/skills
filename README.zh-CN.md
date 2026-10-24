@@ -45,10 +45,18 @@ cp -R skills/generate-cnblogs-version ~/.codex/skills/
 
 根据文字、代码或已有草图，绘制流程图、系统架构图、组件图和数据流图。
 
-- 布局适合时使用 Mermaid，需要精确排布或成图效果不好时直接绘制 SVG。
-- 有 Node.js 时允许轻量尝试一次 Mermaid；运行环境、依赖下载或沙箱受阻时切换 SVG。
-- 保留可编辑图源。使用 SVG 时，如果 Mermaid 能准确表达逻辑，也保留 `.mmd` 供 Agent 理解和修改；不要求渲染这份逻辑记录。
-- 检查裁切、文字遮挡、连线歧义、箭头方向、长宽比和最终成图。
+修改图之前，先选择工作模式：
+
+- **忠实重绘**：已有图片、截图或手绘草图是事实来源时使用。保留可观察到的节点、连线、标签、分组和大致布局，不要悄悄改写拓扑关系。
+- **语义优先创建**：没有需要保留的已有图片时使用。绘图前先提取节点名称、归属、方向关系、分支条件、时序状态和其他语义要求。
+
+保持工作模式明确。已有图存在歧义时，保留可观察到的结构并说明不确定之处，不要自行补出新的关系。
+
+标准流程和时序适合自动布局时使用 Mermaid。有 Node.js 且没有已知环境阻碍时，允许轻量尝试一次 Mermaid 渲染。需要精确排布、固定对齐、密集的跨分组连线或可控路由时，直接编写 SVG。Mermaid 运行环境、浏览器或依赖下载受阻，或者成图效果不好时，直接切换到 SVG。保留可编辑图源：Mermaid 使用 `.mmd`，直接绘制使用 `.svg`。如果 SVG 的关系可以用 Mermaid 准确表达，也保留 `.mmd` 逻辑模型，即使 Mermaid 无法运行。
+
+- 架构图和数据流图默认使用从左到右的布局；简短且天然适合纵向阅读的流程可以使用从上到下的布局。
+- 分组应对应真实的归属或部署边界；主要请求或数据流使用实线，发现、注册、心跳等控制面流量使用虚线。
+- 交付前检查最终图片是否裁切、文字拥挤、连线歧义、箭头方向错误或长宽比不合适。
 
 **调用示例**
 
@@ -68,7 +76,50 @@ cp -R skills/generate-cnblogs-version ~/.codex/skills/
 | Mermaid | Bash、Node.js/`npx`、无头 Chrome/Chromium；首次运行可能下载固定版本的 Mermaid CLI |
 | 直接绘制 SVG | 不依赖 Mermaid；检查成图需要 SVG 查看器或渲染器，导出 PNG 需要可用的渲染器 |
 
-完整规则见 [Skill 说明](draw-technical-diagrams/SKILL.md)。Mermaid 渲染脚本为 [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh)。
+Mermaid 渲染脚本为 [`render-mermaid.sh`](draw-technical-diagrams/scripts/render-mermaid.sh)，支持 PNG、SVG 和 PDF，并固定使用 Mermaid CLI `11.12.0`。
+
+**结构检查**
+
+打开渲染图片前，先运行 Skill 自带的检查脚本：
+
+```bash
+python3 <skill-dir>/scripts/validate-svg.py diagram.svg --strict
+python3 <skill-dir>/scripts/check-markdown-diagrams.py README.md
+```
+
+`validate-svg.py` 会检查 XML、画布元数据、显式白色背景、文本位置、marker 引用、重复 ID 和重复路径几何。`check-markdown-diagrams.py` 会检查 Markdown 和 HTML 中的本地图片链接，按照 Markdown 文件所在目录解析相对路径，并跳过远程 URL、data URL 和只包含锚点的 URL。这些检查用于结构校验，不能代替最终图片的视觉检查。
+
+完整规则见 [Skill 说明](draw-technical-diagrams/SKILL.md)。
+
+**仓库结构**
+
+```text
+draw-technical-diagrams/
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+├── assets/
+│   ├── mermaid.config.json
+│   └── puppeteer.macos.json
+├── references/
+│   └── layout-patterns.md
+└── scripts/
+    ├── check-markdown-diagrams.py
+    ├── validate-svg.py
+    └── render-mermaid.sh
+```
+
+**处理流程**
+
+```text
+原始材料
+  -> 识别组件和关系
+  -> 选择忠实重绘或语义优先创建
+  -> 判断 Mermaid 是否适合当前布局
+  -> 生成 Mermaid 图源或直接编写 SVG
+  -> 渲染所需图片格式
+  -> 检查并验证最终成图
+```
 
 ## 生成博客园版本
 
@@ -106,7 +157,7 @@ dotnet tool install --global dotnet-cnblog
 
 ## 兼容性
 
-目前仅在 Codex 和 macOS 环境中使用验证。Windows、Linux 以及其他 Agent 尚未验证，可能需要调整安装目录、运行时或脚本。Mermaid、Chrome 和 `npx` 等依赖只属于技术绘图 Skill 的 Mermaid 路径，不是两个 Skill 的共同要求。
+目前仅在 Codex 和 macOS 环境中使用验证。Windows、Linux 以及其他 Agent 尚未验证。各 Skill 的依赖分别列在对应章节中，安装其中一个 Skill 不需要安装另一个 Skill 的工具。
 
 ## 许可证
 
