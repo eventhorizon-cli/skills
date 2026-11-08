@@ -1,0 +1,4 @@
+interface:
+  display_name: "技术架构内嵌动图"
+  short_description: "Create embeddable animations for technical documentation"
+  default_prompt: "Use $render-technical-animations to create a self-contained animated SVG of this technical workflow for the README. Generate GIF only if I explicitly request it."

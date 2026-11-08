@@ -1,0 +1,15 @@
+{
+  "width": 1100,
+  "height": 900,
+  "scale": 2,
+  "duration": 8,
+  "fps": 20,
+  "selector": ".demo",
+  "ready": "Boolean(window.animationPlayer)",
+  "css": "[data-export-hide]{display:none!important}.animation{max-width:none;margin:0;padding:0}.demo{border:0;border-radius:0}",
+  "seek": "t => window.animationPlayer.seek(t)",
+  "checkpoints": [
+    {"time": 4, "evaluate": "document.querySelector('#processor-state').textContent", "equals": "Running"},
+    {"time": 7.5, "evaluate": "document.querySelector('#status').textContent", "equals": "Complete"}
+  ]
+}
