@@ -1,0 +1,19 @@
+{
+  "width": 1100,
+  "height": 430,
+  "scale": 2,
+  "duration": 8,
+  "fps": 20,
+  "selector": "svg",
+  "reducedMotion": "no-preference",
+  "ready": "document.documentElement instanceof SVGSVGElement",
+  "seek": "t => { const scene = document.documentElement; scene.pauseAnimations(); scene.setCurrentTime(t); }",
+  "checkpoints": [
+    {"time": 0.5, "evaluate": "Math.round(document.getElementById('request-token').transform.animVal.getItem(0).matrix.e)", "equals": 180},
+    {"time": 2, "evaluate": "Math.round(document.getElementById('request-token').transform.animVal.getItem(0).matrix.e)", "equals": 365},
+    {"time": 4, "evaluate": "[Math.round(document.getElementById('request-token').transform.animVal.getItem(0).matrix.e), getComputedStyle(document.getElementById('state-running')).opacity, getComputedStyle(document.getElementById('step-processing')).opacity]", "equals": [550, "1", "1"]},
+    {"time": 6, "evaluate": "Math.round(document.getElementById('request-token').transform.animVal.getItem(0).matrix.e)", "equals": 735},
+    {"time": 7.5, "evaluate": "[Math.round(document.getElementById('request-token').transform.animVal.getItem(0).matrix.e), getComputedStyle(document.getElementById('state-complete')).opacity, getComputedStyle(document.getElementById('step-complete')).opacity]", "equals": [920, "1", "1"]},
+    {"time": 8.5, "evaluate": "[Math.round(document.getElementById('request-token').transform.animVal.getItem(0).matrix.e), getComputedStyle(document.getElementById('state-ready')).opacity, getComputedStyle(document.getElementById('step-ready')).opacity]", "equals": [180, "1", "1"]}
+  ]
+}

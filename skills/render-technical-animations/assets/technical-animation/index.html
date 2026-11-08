@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Technical animation</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="player.js" defer></script>
+  <script src="scene.js" defer></script>
+</head>
+<body>
+  <main class="animation">
+    <header class="page-heading">
+      <h1 data-copy="heading">A request's path</h1>
+      <p data-copy="intro">A small example of a request moving through a processing stage.</p>
+    </header>
+    <section class="demo" aria-label="Request flow animation">
+      <div class="context-line"><strong data-copy="context">One request</strong><span data-copy="timing">Illustrative timing</span></div>
+      <div class="scene-scroll">
+        <svg viewBox="0 0 1100 310" role="img" aria-labelledby="scene-title scene-description">
+          <title id="scene-title" data-copy="sceneTitle">Source, processor, and result</title>
+          <desc id="scene-description" data-copy="sceneDescription">A request moves to the processor, waits while it runs, then produces a result.</desc>
+          <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#a3b2c2"/></marker></defs>
+          <path class="connector" d="M300 190 H423" marker-end="url(#arrow)"/>
+          <path class="connector" d="M670 190 H793" marker-end="url(#arrow)"/>
+          <rect class="node node-source" x="60" y="70" width="240" height="170" rx="10"/>
+          <rect class="node node-processor" x="430" y="70" width="240" height="170" rx="10"/>
+          <rect class="node node-result" x="800" y="70" width="240" height="170" rx="10"/>
+          <text class="node-label" x="180" y="111" text-anchor="middle" data-copy="source">Source</text>
+          <text class="node-label" x="550" y="111" text-anchor="middle" data-copy="processor">Processor</text>
+          <text class="node-label" x="920" y="111" text-anchor="middle" data-copy="result">Result</text>
+          <text class="node-note" id="processor-state" x="550" y="146" text-anchor="middle">Ready</text>
+          <g id="request-token" transform="translate(180 190)"><rect x="-24" y="-20" width="48" height="40" rx="6"/><text text-anchor="middle" y="6">01</text></g>
+        </svg>
+      </div>
+      <div class="metrics"><span data-copy="statusLabel">Status</span><strong id="status">Ready</strong><span data-copy="stageLabel">Stage</span><strong id="stage">1 / 4</strong></div>
+      <div class="narration"><h2 id="step-title">Ready to send</h2><p id="step-description">The source has one request.</p></div>
+      <div class="controls" data-export-hide>
+        <button type="button" data-control="play">Pause</button>
+        <button type="button" data-control="replay">Replay</button>
+        <label class="sr-only" for="timeline" data-copy="timeline">Timeline</label>
+        <input id="timeline" data-control="timeline" type="range" min="0" max="8" step="any" value="0">
+        <output data-control="time" for="timeline">0.0 / 8.0 s</output>
+        <label><span class="sr-only" data-copy="speed">Playback speed</span><select data-control="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+        <label data-control="language-container"><span class="sr-only" data-copy="language">Language</span><select data-control="language"></select></label>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
