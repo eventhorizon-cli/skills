@@ -111,6 +111,7 @@ Then visually inspect the actual image, preferably with `view_image`. Confirm al
 - The canvas is not blank and the background is white.
 - No node, label, arrowhead, or border is clipped.
 - Text does not overlap arrows or adjacent nodes.
+- Inspect every rendered image at its intended article width and at full size, following every connector, arrowhead, lifeline, divider, and grid line past every text label. Any line crossing, touching, underlining, or passing behind unrelated text is a defect even when the SVG passes structural validation. Reposition the label or reroute the line, then render and inspect the corrected image again; use an opaque label backing only when it preserves a clear, unambiguous connection. Do not infer visual cleanliness from a thumbnail or a successful render.
 - Sequence-diagram message labels that cross intermediate lifelines have an opaque white backing or white halo, and the retained lifelines remain understandable on either side of the label.
 - No node border, curve, angled edge, icon, divider, or decorative geometry crosses, touches, underlines, or passes behind its own label.
 - Multi-line labels have balanced top and bottom padding at normal article width; a technically non-overlapping but visually cramped node still fails verification.
