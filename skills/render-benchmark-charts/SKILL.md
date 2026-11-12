@@ -83,6 +83,16 @@ backend. Keep generated figures deterministic where practical, including SVG IDs
 
 ## Verify visually
 
+For charts intended for publication, match the language of the surrounding article and make the article readable
+without links to local code or result files: include the essential benchmark code, conditions, results, and caveats
+in the article itself. Image references may remain as article assets.
+
+Explicitly inspect every black or dark line in each chart, including uncertainty bars, caps, axes, and grid lines.
+Explain uncertainty lines next to the chart, ensure they correspond to the reported statistic, and ensure they do
+not cross value labels or obscure comparisons. If a line adds confusion, present the uncertainty in an adjacent
+table instead; retain it in the underlying data. Show value labels at a precision that does not suggest a larger
+difference than the measurements support, and verify the labels against the source results.
+
 Render each delivered SVG to a bitmap with an actual SVG renderer and inspect it through an available vision/image
 tool. XML validation and a successful save do not constitute visual review. Check legends, units, axis scaling,
 labels, annotation collisions, clipping, baseline meanings, and agreement with the measured data. Correct issues
